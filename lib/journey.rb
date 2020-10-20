@@ -1,5 +1,7 @@
 class Journey
 
+attr_reader :journey
+
   MINFARE = 1
   PENALTY = 6
 
@@ -17,14 +19,6 @@ class Journey
 
   def in_journey?
     @journey
-  end
-
-  def valid_journey
-    true if !entry_station.nil? && !exit_station.nil?
-  end
-
-  def fare
-   valid_journey ? deduct(MINFARE) : deduct(PENALTY)
   end
 
 end
