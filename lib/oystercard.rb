@@ -1,6 +1,8 @@
+require_relative 'journey'
+
 class Oystercard
 
-  attr_reader :balance, :entry_station, :station_log
+  attr_reader :balance, :entry_station, :exit_station, :station_log
   LIMIT = 90
   MINFARE = 1
   def initialize
@@ -15,50 +17,20 @@ class Oystercard
   end
 
   def touch_in(station)
+    fail "Insufficient funds" if @balance < MINFARE
+    @entry_station = station
     @journeyclass.touch_in(station)
   end
 
   def touch_out(station)
+    deduct(MINFARE)
     @journeyclass.touch_out(station)
+    @exit_station = station
+    @station_log << {boarding: @entry_station, departure: station}
   end
 
   private
   def deduct(money)
     @balance -= money
-  end
-end
-
-class Journey
-
-  #attr_reader :journey
-  MINFARE = 1
-  def initialize
-    @journey = false
-  end
-
-  def touch_in(station)
-    fail "Insufficient funds" if @balance < MINFARE
-    @entry_station = station
-    @journey = true
-  end
-
-  def touch_out(station)
-    deduct(MINFARE)
-    @station_log << {boarding: @entry_station, departure: station}
-    @journey = false
-  end
-
-  def in_journey?
-    @journey
-  end
-end
-
-
-class Station
-  attr_reader :name, :zone
-
-  def initialize(name,zone)
-    @name = name
-    @zone = zone
   end
 end
