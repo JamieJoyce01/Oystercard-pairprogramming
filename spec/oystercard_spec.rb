@@ -2,6 +2,7 @@ require 'oystercard'
 
 RSpec.describe Oystercard do
   let(:station){ double :station }
+  let(:exitstation){ double :station }
 
   describe "#balance" do
 
@@ -45,17 +46,48 @@ RSpec.describe Oystercard do
   describe "#touch_out" do
 
     it 'checks that the user can touch_out' do
-      expect(subject.touch_out).to be false
+      expect(subject.touch_out(exitstation)).to be false
     end
 
     it 'tests if user is charged the minimum fair after touching out' do
       subject.top_up(10)
       subject.touch_in(station)
-      expect { subject.touch_out }.to change {subject.balance}.by (-Oystercard::MINFARE)
+      expect { subject.touch_out(exitstation) }.to change {subject.balance}.by (-Oystercard::MINFARE)
+    end
+  end
+
+  describe "#journey" do
+
+    it "checks journey log is empty by default" do
+      expect(subject.station_log).to eq []
+    end
+
+    it "checks that touching in and out creates a journey" do
+      subject.top_up(10)
+      subject.touch_in(station)
+      subject.touch_out(exitstation)
+      expect(subject.station_log).to eq [{boarding: station, departure: exitstation}]
     end
   end
 end
 
+RSpec.describe Station do
+  let(:testname){ double :name }
+  let(:testzone){ double :zone }
+
+  subject {Station.new(testname,testzone)} #Can also use described_class.new instead of Station.new
+
+  describe '#station' do
+
+    it "tests to see if the station knows its name" do
+      expect(subject.name).to eq testname
+    end
+
+    it "tests to see if the station knows its zone" do
+      expect(subject.zone).to eq testzone
+    end
+  end
+end
 # it "deducts money from the balance of the card" do
 #   card = Oystercard.new
 #   card.top_up(10)
